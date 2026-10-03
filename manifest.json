@@ -1,7 +1,7 @@
 {
   "id": "rtl-support-plus",
   "name": "RTL Support++",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minAppVersion": "1.6.2",
   "description": "Right-to-left text direction for Arabic, Hebrew and Persian notes, with automatic direction, per-line handling and no typing lag.",
   "author": "AhmedAlfahdi",

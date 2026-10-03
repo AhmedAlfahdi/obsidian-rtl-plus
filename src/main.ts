@@ -187,7 +187,17 @@ export default class RtlSupportPlugin extends Plugin implements RtlHost {
     const preview = view.contentEl.querySelector(".markdown-preview-view");
     if (preview instanceof HTMLElement) this.styleTarget(preview, direction);
 
-    // 4. The note title in the tab header.
+    // 4. The properties panel. Obsidian lays the label/value rows out with
+    //    flexbox, so the CSS `direction` alone does not move the labels — the
+    //    `dir` attribute has to be on the container for the panel to lay out
+    //    right-to-left as a whole.
+    const metadata = view.contentEl.querySelector(".metadata-container");
+    if (metadata instanceof HTMLElement) {
+      metadata.setAttribute("dir", direction === "auto" ? "auto" : direction);
+      this.styleTarget(metadata, direction);
+    }
+
+    // 5. The note title in the tab header.
     if (this.settings.setNoteTitleDirection) {
       const title = view.containerEl.querySelector(".view-header-title");
       if (title instanceof HTMLElement) {
@@ -195,7 +205,7 @@ export default class RtlSupportPlugin extends Plugin implements RtlHost {
       }
     }
 
-    // 5. Let the per-view extension rebuild its auto decorations. Targeted state
+    // 6. Let the per-view extension rebuild its auto decorations. Targeted state
     //    effect, not a blanket dispatch(): the latter re-measures the document.
     cm?.dispatch({ effects: refreshDirection.of(undefined) });
 

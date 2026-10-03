@@ -130,6 +130,13 @@ function makeView() {
   contentEl.append(cmScroller);
   const preview = new FakeEl("div", "markdown-preview-view");
   contentEl.append(preview);
+  // Obsidian's Properties panel lives inside the view content.
+  const metadata = new FakeEl("div", "metadata-container");
+  const propertyKey = new FakeEl("div", "metadata-property-key");
+  const propertyValue = new FakeEl("div", "metadata-property-value");
+  metadata.append(propertyKey);
+  metadata.append(propertyValue);
+  contentEl.append(metadata);
   const containerEl = new FakeEl("div");
   const title = new FakeEl("div", "view-header-title");
   containerEl.append(title);
@@ -141,10 +148,20 @@ function makeView() {
     containerEl,
     editor: { cm: { dom: cmEditor, dispatch: () => { dispatched++; } } },
   });
-  return { view, contentEl, cmEditor, preview, title };
+  return {
+    view,
+    contentEl,
+    cmEditor,
+    preview,
+    title,
+    metadata,
+    propertyKey,
+    propertyValue,
+  };
 }
 let dispatched = 0;
-const { view, contentEl, cmEditor, preview, title } = makeView();
+const { view, contentEl, cmEditor, preview, title, metadata, propertyKey } =
+  makeView();
 const app = {
   vault: { getAbstractFileByPath: (p) => (p === NOTE_PATH ? view.file : null), on: () => {} },
   metadataCache: { getFileCache: () => ({ frontmatter: { direction: "rtl" } }) },
@@ -175,6 +192,8 @@ const app = {
     ["title style", title.style.direction],
     ["cm dispatch called", String(dispatched > 0)],
     ["status bar text", plugin.statusBarText?.textContent ?? "(none)"],
+    ["properties dir attr", metadata.getAttribute("dir")],
+    ["properties style", metadata.style.direction],
   ];
 
   console.log("=== direction applied to the editor path ===");
@@ -187,6 +206,10 @@ const app = {
   if (preview.style.direction !== "rtl") failures.push("preview");
   if (contentEl.getAttribute("dir") !== "rtl") failures.push("dir attribute");
   if (!plugin.commands.some((c) => c.id === "report-text-direction")) failures.push("diagnostics command");
+  // Regression: the properties panel was pinned LTR by the pin-list, which left
+  // Arabic labels on the left of their values.
+  if (metadata.style.direction !== "rtl") failures.push("properties inline style");
+  if (metadata.getAttribute("dir") !== "rtl") failures.push("properties dir attribute");
 
   console.log(failures.length ? `\nFAIL: ${failures.join(", ")}` : "\nPASS: every target received rtl");
   process.exit(failures.length ? 1 : 0);

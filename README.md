@@ -30,6 +30,17 @@ slow to type in.
 - Code, math, tables, tags and links are isolated so they keep their own
   direction inside RTL prose.
 
+## Properties panel
+
+The Properties panel follows the note's direction: in an RTL note the labels
+(`العنوان`, `المؤلف`) sit on the right of their values. Individual values are
+isolated, so a Latin value — an URL, a date, a tag — keeps its own internal order
+without dragging the label with it.
+
+Earlier versions pinned the panel left-to-right, which left the labels stranded
+on the left while their Arabic values rendered right-to-left. That reads as
+neither language, and is fixed in 1.0.3.
+
 ## Why it is faster
 
 The plugin this replaces rebuilt a CodeMirror decoration set for the whole

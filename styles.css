@@ -46,7 +46,6 @@
 	.cm-math,
 	.frontmatter,
 	.cm-hmd-frontmatter,
-	.metadata-container,
 	.markdown-rendered table,
 	.callout[data-callout="quote"] cite,
 	.external-link,
@@ -56,6 +55,49 @@
 ) {
 	direction: ltr;
 	unicode-bidi: isolate;
+}
+
+/*
+ * Properties panel.
+ *
+ * The container must FOLLOW the note's direction, not be pinned: pinning it
+ * left the labels (`العنوان`, `المؤلف`) on the left while their values rendered
+ * right-to-left, which reads as neither language. Only the individual values are
+ * isolated, so a Latin value inside an RTL note keeps its own ordering without
+ * dragging the label.
+ */
+.rtl-plus-rtl .metadata-container {
+	direction: rtl;
+	text-align: right;
+}
+
+.rtl-plus-ltr .metadata-container {
+	direction: ltr;
+	text-align: left;
+}
+
+/* Keep each property row LTR-neutral: the row is a label + value pair, and the
+   container decides which side the label sits on. */
+.rtl-plus-rtl .metadata-property,
+.rtl-plus-rtl .metadata-property-key,
+.rtl-plus-rtl .metadata-property-value {
+	unicode-bidi: isolate;
+}
+
+/* Dates, links and URLs are Latin/locale-formatted: keep their internal order. */
+.rtl-plus-rtl .metadata-property-value :is(input, a, code, .multi-select-pill) {
+	direction: ltr;
+	unicode-bidi: isolate;
+}
+
+/* The value of a text property that is itself Arabic should still read RTL. */
+.rtl-plus-rtl .metadata-property-value input[type="text"] {
+	direction: inherit;
+}
+
+/* Tags in RTL notes read right-to-left, so the remove affordance moves sides. */
+.rtl-plus-rtl .metadata-property-value .multi-select-pill {
+	direction: rtl;
 }
 
 /* Inline isolates: a URL or tag inside Arabic prose should not drag the
