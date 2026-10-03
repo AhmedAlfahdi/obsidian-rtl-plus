@@ -35,31 +35,65 @@ describe("work is proportional to the viewport, not the document", () => {
 });
 
 describe("direction detection is bounded", () => {
-  it("dominantDirection samples a fixed prefix, not the whole note", () => {
-    // A 200k-character note: the scan must stay bounded by maxScan.
-    const huge = "ا".repeat(200000);
-    const started = process.hrtime.bigint();
-    dominantDirection(huge, 2000);
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+  /**
+   * A string-like object that counts `charCodeAt` reads. Asserting the number of
+   * characters examined is deterministic, unlike a wall-clock bound — an
+   * absolute 20ms threshold failed on a cold CI runner at 22ms, which said
+   * nothing about the algorithm.
+   */
+  function counted(text: string, maxScan?: number) {
+    let reads = 0;
+    const obj = {
+      length: text.length,
+      charCodeAt(i: number): number {
+        reads++;
+        return text.charCodeAt(i);
+      },
+      slice: (a?: number, b?: number) => text.slice(a, b),
+      toString: () => text,
+      valueOf: () => text,
+    };
+    return {
+      /** Cast because the implementation only uses the members above. */
+      text: obj as unknown as string,
+      run: () => dominantDirection(obj as unknown as string, maxScan),
+      runLine: () => lineDirection(obj as unknown as string),
+      reads: () => reads,
+    };
+  }
 
-    // 2000 characters is microseconds of work; a whole-document scan would be
-    // ~100x this. The bound is deliberately loose so it cannot be flaky.
-    expect(elapsedMs).toBeLessThan(20);
+  it("scans a fixed prefix, so the cost does not grow with the note", () => {
+    const small = counted("ا".repeat(2000), 1000);
+    small.run();
+    const huge = counted("ا".repeat(200000), 1000);
+    huge.run();
+
+    // 100x more text, the same amount of work.
+    expect(small.reads()).toBeLessThanOrEqual(1000);
+    expect(huge.reads()).toBeLessThanOrEqual(1000);
+    expect(huge.reads()).toBe(small.reads());
   });
 
-  it("lineDirection is linear in the line, and lines are short", () => {
-    const line = "هذا سطر عربي طويل نسبيا مع كلمات كثيرة ".repeat(10);
-    const started = process.hrtime.bigint();
-    for (let i = 0; i < 10000; i++) lineDirection(line);
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    // 10k classifications of a ~430-character line.
-    expect(elapsedMs).toBeLessThan(1500);
+  it("samples the prefix even when the note is short", () => {
+    const short = counted("ا".repeat(300), 1000);
+    short.run();
+    expect(short.reads()).toBe(300);
   });
 
-  it("returns on the first strong character for typical prose", () => {
-    // Cheap early exit: the answer is available in the first few characters.
-    expect(lineDirection("مرحبا بكم في هذا النص الطويل")).toBe("rtl");
-    expect(lineDirection("Welcome to this long English sentence")).toBe("ltr");
+  it("stops at the first strong character, so long lines are cheap", () => {
+    const arabic = counted("م" + "ن".repeat(5000));
+    arabic.runLine();
+    const latin = counted("a" + "b".repeat(5000));
+    latin.runLine();
+
+    // Decided within the first character, not after 5001.
+    expect(arabic.reads()).toBeLessThan(10);
+    expect(latin.reads()).toBeLessThan(10);
+  });
+
+  it("reads neutrals before deciding, but no more than the leading run", () => {
+    const leading = counted("- ".repeat(20) + "م" + "ن".repeat(5000));
+    leading.runLine();
+    expect(leading.reads()).toBeLessThan(50);
   });
 });

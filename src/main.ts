@@ -331,6 +331,34 @@ export default class RtlSupportPlugin extends Plugin implements RtlHost {
       `settings: title=${this.settings.setNoteTitleDirection} pinFm=${this.settings.pinFrontmatterLtr} statusBar=${this.settings.statusBar}`,
     ];
 
+    // Dump the real property-label element. Nothing short of the computed style
+    // and box position says whether a label is aligned against its value.
+    const panel = view.contentEl.querySelector(".metadata-container");
+    const keys = panel?.querySelectorAll(".metadata-property-key");
+    if (keys && keys.length) {
+      lines.push(`label elems: ${keys.length}`);
+      // Sample one Arabic label and one Latin label when possible.
+      const pick = (el: Element) => {
+        const cs = getComputedStyle(el as HTMLElement);
+        const r = (el as HTMLElement).getBoundingClientRect();
+        return `${JSON.stringify((el.textContent ?? "").trim().slice(0, 14))} ${el.tagName.toLowerCase()} align=${cs.textAlign} dir=${cs.direction} right=${Math.round(r.right)}`;
+      };
+      const all = Array.from(keys);
+      const latin = all.find((el) =>
+        /^[\x20-\x7e]+$/.test((el.textContent ?? "").trim()),
+      );
+      const arabic = all.find((el) =>
+        /[\u0600-\u06ff]/.test(el.textContent ?? ""),
+      );
+      if (arabic) lines.push(`  AR: ${pick(arabic)}`);
+      if (latin) lines.push(`  LA: ${pick(latin)}`);
+      lines.push(
+        `  all right edges: ${all.map((el) => Math.round((el as HTMLElement).getBoundingClientRect().right)).join(",")}`,
+      );
+    } else {
+      lines.push(`label element: not found (panel=${panel ? "yes" : "no"})`);
+    }
+
     console.info("[RTL Support++]\n" + lines.join("\n"));
     new Notice(lines.join("\n"), 12000);
   }

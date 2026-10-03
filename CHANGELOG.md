@@ -2,6 +2,19 @@
 
 All notable changes to this plugin.
 
+## 1.0.5
+
+### Fixed
+
+- **Arabic and Latin property names now share the same right edge.** The label
+  rule set `direction: rtl` on the key element, which made Latin labels
+  ("isbn 13", "Asin") pin flush right while Arabic labels stopped 20-40px short —
+  measured against a screenshot of the panel. The direction is no longer forced;
+  the key inherits the container's direction and is aligned with
+  `text-align: end`, so every label lands on the same edge.
+- Cover the camel-case `.metadataPropertyKey` / `.metadataPropertyValue`
+  spellings used by some Obsidian builds.
+
 ## 1.0.4
 
 ### Fixed

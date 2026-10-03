@@ -96,9 +96,18 @@
 .rtl-plus-rtl .metadata-property-key,
 .rtl-plus-rtl .metadata-property-key > input,
 .rtl-plus-rtl .metadata-property-key .metadata-property-key-input,
-.rtl-plus-rtl .metadata-property-icon {
+.rtl-plus-rtl .metadata-property-icon,
+.rtl-plus-rtl .metadataPropertyKey {
   text-align: end;
-  direction: rtl;
+  /*
+   * No `direction: rtl` here, deliberately. Forcing it makes Latin labels
+   * ("isbn 13", "Asin") pin flush to the right edge while Arabic labels stop
+   * 20-40px short of it — measured on a real screenshot — because the two
+   * scripts round their trailing edge differently under an explicit direction.
+   * Inheriting the container's direction and aligning with `text-align: end`
+   * puts every label on the same edge, whatever script it is written in.
+   */
+  unicode-bidi: isolate;
 }
 
 .rtl-plus-ltr .metadata-property-key,
@@ -110,6 +119,11 @@
 /* The value column keeps its own alignment so a right-aligned label does not
    drag a Latin value with it. */
 .rtl-plus-rtl .metadata-property-value {
+  text-align: start;
+}
+
+/* The value column, camel-case spelling used by some builds. */
+.rtl-plus-rtl .metadataPropertyValue {
   text-align: start;
 }
 
