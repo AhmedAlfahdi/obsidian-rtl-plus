@@ -1,0 +1,128 @@
+/*
+ * RTL Support++
+ *
+ * Performance note: the plugin this replaces styled every `div`, `p` and `li`
+ * inside a note (`.is-rtl div, .is-rtl li, .is-rtl p { … }`). On a long note
+ * that is tens of thousands of matched elements, re-evaluated on every DOM
+ * mutation while typing. Here the direction is set once on the container via
+ * the `dir` attribute, which the browser applies natively and for free, and CSS
+ * is used only for the things the browser gets wrong on its own.
+ */
+
+/* Containers carry the direction. `dir` is an HTML attribute, so the browser
+   handles inheritance and bidi resolution natively — no descendant rules. */
+.markdown-source-view.rtl-plus-rtl,
+.markdown-preview-view.rtl-plus-rtl,
+.markdown-reading-view .rtl-plus-rtl,
+.rtl-plus-rtl .markdown-preview-sizer {
+	direction: rtl;
+	text-align: right;
+}
+
+.markdown-source-view.rtl-plus-ltr,
+.markdown-preview-view.rtl-plus-ltr,
+.markdown-reading-view .rtl-plus-ltr,
+.rtl-plus-ltr .markdown-preview-sizer {
+	direction: ltr;
+	text-align: left;
+}
+
+/* Auto: let the browser decide per block from its first strong character. */
+.rtl-plus-auto {
+	direction: auto;
+}
+
+/*
+ * Content that must stay left-to-right even inside an RTL note. These are the
+ * cases where bidi would otherwise reorder punctuation and break copy-paste.
+ * Kept as a short, specific list — each selector is cheap.
+ */
+.rtl-plus-rtl :is(
+	code,
+	pre,
+	.cm-inline-code,
+	.HyperMD-codeblock,
+	.math,
+	.cm-math,
+	.frontmatter,
+	.cm-hmd-frontmatter,
+	.metadata-container,
+	.markdown-rendered table,
+	.callout[data-callout="quote"] cite,
+	.external-link,
+	.internal-link,
+	.tag,
+	img
+) {
+	direction: ltr;
+	unicode-bidi: isolate;
+}
+
+/* Inline isolates: a URL or tag inside Arabic prose should not drag the
+   surrounding punctuation with it. `isolate` is cheaper and more correct than
+   `embed`/`override`. */
+.rtl-plus-rtl .cm-url,
+.rtl-plus-rtl .cm-hmd-internal-link,
+.rtl-plus-rtl .cm-tag,
+.rtl-plus-rtl .cm-formatting-link {
+	unicode-bidi: isolate;
+}
+
+/* Keep raw YAML left-to-right in the editor (optional, on by default). The
+   per-line decoration sets dir="ltr" on those lines; this only covers the case
+   where a theme overrides it. */
+.rtl-plus-rtl .cm-line.HyperMD-frontmatter,
+.rtl-plus-rtl .cm-line[dir="ltr"] {
+	direction: ltr;
+	text-align: left;
+}
+
+/* Lists: in RTL the marker must sit on the right. The browser handles this via
+   `dir`, but Obsidian's editor renders markers as separate spans, so correct
+   the indent side only where it is actually wrong. */
+.rtl-plus-rtl .cm-line.HyperMD-list-line {
+	padding-inline-start: 0;
+}
+
+/* Callouts: title and content follow the note, the fold icon moves sides. */
+.rtl-plus-rtl .callout {
+	direction: rtl;
+}
+
+.rtl-plus-rtl .callout-icon,
+.rtl-plus-rtl .callout-fold {
+	margin-inline-end: 0;
+	margin-inline-start: var(--size-4-2, 8px);
+}
+
+/* Right-align YAML blocks in the reading view when the setting asks for it. */
+.rtl-plus-rtl.rtl-plus-yaml-rtl pre.language-yaml,
+.rtl-plus-rtl.rtl-plus-yaml-rtl code.language-yaml {
+	text-align: right;
+}
+
+.rtl-plus-rtl.rtl-plus-yaml-rtl pre.language-yaml + button.copy-code-button {
+	right: unset;
+	left: 0;
+}
+
+/* Status bar item */
+.rtl-plus-status {
+	cursor: pointer;
+}
+
+.rtl-plus-status.rtl-plus-hidden {
+	display: none;
+}
+
+/* Printing and PDF export: keep the direction. */
+@media print {
+	.rtl-plus-rtl {
+		direction: rtl;
+		text-align: right;
+	}
+	.rtl-plus-ltr {
+		direction: ltr;
+		text-align: left;
+	}
+}

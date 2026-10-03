@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+  # So a release can be built by hand if tag pushes are restricted.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Lint and type-check
+        run: npm run lint
+
+      - name: Build
+        run: node esbuild.config.mjs production
+
+      - name: Verify the manifest version matches the tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          manifest=$(node -p "require('./manifest.json').version")
+          tag="${GITHUB_REF#refs/tags/}"
+          echo "manifest=$manifest tag=$tag"
+          test "$manifest" = "$tag"
+
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            main.js
+            manifest.json
+            styles.css
