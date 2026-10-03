@@ -3,6 +3,7 @@ import type { EditorView } from "@codemirror/view";
 import {
   Direction,
   directionLabel,
+  dominantDirection,
   nextDirection,
   parseDirection,
   resolveDirection,
@@ -191,10 +192,18 @@ export default class RtlSupportPlugin extends Plugin implements RtlHost {
     //    flexbox, so the CSS `direction` alone does not move the labels — the
     //    `dir` attribute has to be on the container for the panel to lay out
     //    right-to-left as a whole.
+    //
+    //    `dir="auto"` is resolved per element by the browser from that element's
+    //    own first strong character. A property panel is mostly the single word
+    //    "Properties" plus Latin keys, so auto would resolve LTR and undo the
+    //    note's direction. Under `auto` we therefore detect the note's direction
+    //    ourselves and apply it concretely.
     const metadata = view.contentEl.querySelector(".metadata-container");
     if (metadata instanceof HTMLElement) {
-      metadata.setAttribute("dir", direction === "auto" ? "auto" : direction);
-      this.styleTarget(metadata, direction);
+      const panelDirection =
+        direction === "auto" ? this.detectDirection(view) : direction;
+      metadata.setAttribute("dir", panelDirection);
+      this.styleTarget(metadata, panelDirection);
     }
 
     // 5. The note title in the tab header.
@@ -210,6 +219,15 @@ export default class RtlSupportPlugin extends Plugin implements RtlHost {
     cm?.dispatch({ effects: refreshDirection.of(undefined) });
 
     this.updateStatusBar(direction, resolved.source, view.file);
+  }
+
+  /**
+   * Resolve `auto` to a concrete direction for chrome that cannot inherit it,
+   * by sampling the note's own text.
+   */
+  private detectDirection(view: MarkdownView): "ltr" | "rtl" {
+    const text = view.editor?.getValue?.() ?? "";
+    return dominantDirection(text);
   }
 
   private styleTarget(el: HTMLElement, direction: Direction): void {

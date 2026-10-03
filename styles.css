@@ -15,21 +15,21 @@
 .markdown-preview-view.rtl-plus-rtl,
 .markdown-reading-view .rtl-plus-rtl,
 .rtl-plus-rtl .markdown-preview-sizer {
-	direction: rtl;
-	text-align: right;
+  direction: rtl;
+  text-align: right;
 }
 
 .markdown-source-view.rtl-plus-ltr,
 .markdown-preview-view.rtl-plus-ltr,
 .markdown-reading-view .rtl-plus-ltr,
 .rtl-plus-ltr .markdown-preview-sizer {
-	direction: ltr;
-	text-align: left;
+  direction: ltr;
+  text-align: left;
 }
 
 /* Auto: let the browser decide per block from its first strong character. */
 .rtl-plus-auto {
-	direction: auto;
+  direction: auto;
 }
 
 /*
@@ -37,24 +37,25 @@
  * cases where bidi would otherwise reorder punctuation and break copy-paste.
  * Kept as a short, specific list — each selector is cheap.
  */
-.rtl-plus-rtl :is(
-	code,
-	pre,
-	.cm-inline-code,
-	.HyperMD-codeblock,
-	.math,
-	.cm-math,
-	.frontmatter,
-	.cm-hmd-frontmatter,
-	.markdown-rendered table,
-	.callout[data-callout="quote"] cite,
-	.external-link,
-	.internal-link,
-	.tag,
-	img
-) {
-	direction: ltr;
-	unicode-bidi: isolate;
+.rtl-plus-rtl
+  :is(
+    code,
+    pre,
+    .cm-inline-code,
+    .HyperMD-codeblock,
+    .math,
+    .cm-math,
+    .frontmatter,
+    .cm-hmd-frontmatter,
+    .markdown-rendered table,
+    .callout[data-callout="quote"] cite,
+    .external-link,
+    .internal-link,
+    .tag,
+    img
+  ) {
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 /*
@@ -67,13 +68,13 @@
  * dragging the label.
  */
 .rtl-plus-rtl .metadata-container {
-	direction: rtl;
-	text-align: right;
+  direction: rtl;
+  text-align: right;
 }
 
 .rtl-plus-ltr .metadata-container {
-	direction: ltr;
-	text-align: left;
+  direction: ltr;
+  text-align: left;
 }
 
 /* Keep each property row LTR-neutral: the row is a label + value pair, and the
@@ -81,23 +82,51 @@
 .rtl-plus-rtl .metadata-property,
 .rtl-plus-rtl .metadata-property-key,
 .rtl-plus-rtl .metadata-property-value {
-	unicode-bidi: isolate;
+  unicode-bidi: isolate;
+}
+
+/*
+ * Align the property NAMES to the right in RTL notes. The container direction
+ * moves each row's label to the right-hand side, but the label text itself stays
+ * flush left within its box, so it reads as detached from its value.
+ *
+ * Logical properties (`text-align: start/end`) are used rather than left/right so
+ * the same rules work in both directions without a mirror set.
+ */
+.rtl-plus-rtl .metadata-property-key,
+.rtl-plus-rtl .metadata-property-key > input,
+.rtl-plus-rtl .metadata-property-key .metadata-property-key-input,
+.rtl-plus-rtl .metadata-property-icon {
+  text-align: end;
+  direction: rtl;
+}
+
+.rtl-plus-ltr .metadata-property-key,
+.rtl-plus-ltr .metadata-property-key > input,
+.rtl-plus-ltr .metadata-property-key .metadata-property-key-input {
+  text-align: start;
+}
+
+/* The value column keeps its own alignment so a right-aligned label does not
+   drag a Latin value with it. */
+.rtl-plus-rtl .metadata-property-value {
+  text-align: start;
 }
 
 /* Dates, links and URLs are Latin/locale-formatted: keep their internal order. */
 .rtl-plus-rtl .metadata-property-value :is(input, a, code, .multi-select-pill) {
-	direction: ltr;
-	unicode-bidi: isolate;
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 /* The value of a text property that is itself Arabic should still read RTL. */
 .rtl-plus-rtl .metadata-property-value input[type="text"] {
-	direction: inherit;
+  direction: inherit;
 }
 
 /* Tags in RTL notes read right-to-left, so the remove affordance moves sides. */
 .rtl-plus-rtl .metadata-property-value .multi-select-pill {
-	direction: rtl;
+  direction: rtl;
 }
 
 /* Inline isolates: a URL or tag inside Arabic prose should not drag the
@@ -107,7 +136,7 @@
 .rtl-plus-rtl .cm-hmd-internal-link,
 .rtl-plus-rtl .cm-tag,
 .rtl-plus-rtl .cm-formatting-link {
-	unicode-bidi: isolate;
+  unicode-bidi: isolate;
 }
 
 /* Keep raw YAML left-to-right in the editor (optional, on by default). The
@@ -115,56 +144,56 @@
    where a theme overrides it. */
 .rtl-plus-rtl .cm-line.HyperMD-frontmatter,
 .rtl-plus-rtl .cm-line[dir="ltr"] {
-	direction: ltr;
-	text-align: left;
+  direction: ltr;
+  text-align: left;
 }
 
 /* Lists: in RTL the marker must sit on the right. The browser handles this via
    `dir`, but Obsidian's editor renders markers as separate spans, so correct
    the indent side only where it is actually wrong. */
 .rtl-plus-rtl .cm-line.HyperMD-list-line {
-	padding-inline-start: 0;
+  padding-inline-start: 0;
 }
 
 /* Callouts: title and content follow the note, the fold icon moves sides. */
 .rtl-plus-rtl .callout {
-	direction: rtl;
+  direction: rtl;
 }
 
 .rtl-plus-rtl .callout-icon,
 .rtl-plus-rtl .callout-fold {
-	margin-inline-end: 0;
-	margin-inline-start: var(--size-4-2, 8px);
+  margin-inline-end: 0;
+  margin-inline-start: var(--size-4-2, 8px);
 }
 
 /* Right-align YAML blocks in the reading view when the setting asks for it. */
 .rtl-plus-rtl.rtl-plus-yaml-rtl pre.language-yaml,
 .rtl-plus-rtl.rtl-plus-yaml-rtl code.language-yaml {
-	text-align: right;
+  text-align: right;
 }
 
 .rtl-plus-rtl.rtl-plus-yaml-rtl pre.language-yaml + button.copy-code-button {
-	right: unset;
-	left: 0;
+  right: unset;
+  left: 0;
 }
 
 /* Status bar item */
 .rtl-plus-status {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 .rtl-plus-status.rtl-plus-hidden {
-	display: none;
+  display: none;
 }
 
 /* Printing and PDF export: keep the direction. */
 @media print {
-	.rtl-plus-rtl {
-		direction: rtl;
-		text-align: right;
-	}
-	.rtl-plus-ltr {
-		direction: ltr;
-		text-align: left;
-	}
+  .rtl-plus-rtl {
+    direction: rtl;
+    text-align: right;
+  }
+  .rtl-plus-ltr {
+    direction: ltr;
+    text-align: left;
+  }
 }

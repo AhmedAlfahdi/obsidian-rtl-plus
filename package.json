@@ -1,6 +1,6 @@
 {
   "name": "rtl-support-plus",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Right-to-left text direction support for Obsidian, built for large notes.",
   "private": true,
   "scripts": {

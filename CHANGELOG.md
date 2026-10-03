@@ -2,6 +2,19 @@
 
 All notable changes to this plugin.
 
+## 1.0.4
+
+### Fixed
+
+- **Property names are right-aligned in RTL notes.** The panel was RTL, so labels
+  moved to the right-hand side, but each label's text still started at its box's
+  left edge and read as detached from its value. Alignment now uses logical
+  `text-align: end`, so the same rules work in both directions.
+- **`auto` now resolves the panel direction from the note's content.** `dir="auto"`
+  is resolved by the browser per element, and a properties panel is mostly the
+  single word "Properties" plus Latin keys — so auto resolved LTR and undid the
+  note's direction.
+
 ## 1.0.3
 
 ### Fixed
