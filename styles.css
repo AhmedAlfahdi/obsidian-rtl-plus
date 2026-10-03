@@ -86,45 +86,55 @@
 }
 
 /*
- * Align the property NAMES to the right in RTL notes. The container direction
- * moves each row's label to the right-hand side, but the label text itself stays
- * flush left within its box, so it reads as detached from its value.
+ * Property names, aligned with an ABSOLUTE side.
  *
- * Logical properties (`text-align: start/end`) are used rather than left/right so
- * the same rules work in both directions without a mirror set.
+ * Measured in a browser over five candidate rules (see test_vault_rtl/.align.html):
+ *
+ *   text-align: end                 -> left-aligned  (WRONG)
+ *   text-align: right               -> right-aligned (correct)
+ *   text-align: right + direction   -> right-aligned, but Latin labels end
+ *                                      20-40px further right than Arabic ones
+ *
+ * `end` resolves against the ELEMENT's own direction, not its container's, and
+ * the key element does not inherit RTL — so `end` resolved to left and every
+ * label went left-aligned. `right` is absolute and cannot be redirected by an
+ * inherited direction. `direction: rtl` is deliberately NOT set: it aligns the
+ * two scripts to different edges. `unicode-bidi: isolate` keeps a label's bidi
+ * from leaking into its value.
  */
 .rtl-plus-rtl .metadata-property-key,
 .rtl-plus-rtl .metadata-property-key > input,
 .rtl-plus-rtl .metadata-property-key .metadata-property-key-input,
-.rtl-plus-rtl .metadata-property-icon,
-.rtl-plus-rtl .metadataPropertyKey {
-  text-align: end;
-  /*
-   * No `direction: rtl` here, deliberately. Forcing it makes Latin labels
-   * ("isbn 13", "Asin") pin flush to the right edge while Arabic labels stop
-   * 20-40px short of it — measured on a real screenshot — because the two
-   * scripts round their trailing edge differently under an explicit direction.
-   * Inheriting the container's direction and aligning with `text-align: end`
-   * puts every label on the same edge, whatever script it is written in.
-   */
+.rtl-plus-rtl .metadata-property-key-input,
+.rtl-plus-rtl .metadataPropertyKey,
+.rtl-plus-rtl [dir="rtl"] .metadata-property-key,
+.rtl-plus-rtl .metadata-property-key > div {
+  text-align: right;
   unicode-bidi: isolate;
 }
 
 .rtl-plus-ltr .metadata-property-key,
 .rtl-plus-ltr .metadata-property-key > input,
-.rtl-plus-ltr .metadata-property-key .metadata-property-key-input {
-  text-align: start;
+.rtl-plus-ltr .metadata-property-key .metadata-property-key-input,
+.rtl-plus-ltr .metadataPropertyKey {
+  text-align: left;
 }
 
 /* The value column keeps its own alignment so a right-aligned label does not
    drag a Latin value with it. */
 .rtl-plus-rtl .metadata-property-value {
-  text-align: start;
+  text-align: right;
+}
+
+/* A Latin value inside an RTL note keeps its own reading direction … */
+.rtl-plus-rtl .metadata-property-value input,
+.rtl-plus-rtl .metadata-property-value a {
+  text-align: left;
 }
 
 /* The value column, camel-case spelling used by some builds. */
 .rtl-plus-rtl .metadataPropertyValue {
-  text-align: start;
+  text-align: right;
 }
 
 /* Dates, links and URLs are Latin/locale-formatted: keep their internal order. */

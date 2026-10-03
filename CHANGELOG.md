@@ -2,6 +2,22 @@
 
 All notable changes to this plugin.
 
+## 1.0.6
+
+### Fixed
+
+- **Property names are right-aligned again.** 1.0.5 switched the label rule to
+  logical `text-align: end`, which resolves against the *element's* own
+  direction — and the key element does not inherit RTL, so `end` resolved to
+  left and every label went left-aligned. The rule now uses absolute
+  `text-align: right`, which no inherited direction can redirect.
+- `direction: rtl` remains off the label: with it set, Latin labels (`isbn 13`)
+  end 20-40px further right than Arabic ones. Measured in a browser over five
+  candidate rules; `text-align: right` alone is the one that puts both scripts on
+  the same edge without that side effect.
+- The value column is aligned absolutely too, and Latin values inside an RTL note
+  keep their own reading direction.
+
 ## 1.0.5
 
 ### Fixed
