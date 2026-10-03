@@ -1,13 +1,14 @@
 {
   "name": "rtl-support-plus",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Right-to-left text direction support for Obsidian, built for large notes.",
   "private": true,
   "scripts": {
     "dev": "node esbuild.config.mjs",
-    "build": "npm run lint && node esbuild.config.mjs production",
+    "build": "npm run lint && node esbuild.config.mjs production && node harness/plugin_smoke.cjs",
     "test": "jest",
-    "lint": "prettier --check \"src/**/*.ts\" && tsc --noEmit --skipLibCheck"
+    "lint": "prettier --check \"src/**/*.ts\" && tsc --noEmit --skipLibCheck",
+    "smoke": "node esbuild.config.mjs production && node harness/plugin_smoke.cjs"
   },
   "author": "AhmedAlfahdi",
   "license": "MIT",

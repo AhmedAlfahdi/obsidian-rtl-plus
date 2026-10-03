@@ -76,11 +76,21 @@ export default class RtlSupportPlugin extends Plugin implements RtlHost {
 
     this.addSettingTab(new RtlSettingTab(this.app, this));
 
+    const applyToLeaf = (leaf: WorkspaceLeaf | null): void => {
+      const view = leaf?.view;
+      if (!(view instanceof MarkdownView)) {
+        this.hideStatusBar();
+        return;
+      }
+      this.applyToView(view);
+    };
     this.registerEvent(
-      this.app.workspace.on(
-        "active-leaf-change",
-        (leaf: WorkspaceLeaf | null) => this.onActiveLeafChange(leaf),
-      ),
+      this.app.workspace.on("active-leaf-change", applyToLeaf),
+    );
+    // Not every way of showing a note changes the active leaf, and the editor
+    // element may not exist yet when the leaf event fires.
+    this.registerEvent(
+      this.app.workspace.on("file-open", () => this.refreshActiveView()),
     );
 
     this.registerEvent(
@@ -149,15 +159,6 @@ export default class RtlSupportPlugin extends Plugin implements RtlHost {
   }
 
   // ── Applying ──────────────────────────────────────────────────────────────
-
-  private onActiveLeafChange(leaf: WorkspaceLeaf | null): void {
-    const view = leaf?.view;
-    if (!(view instanceof MarkdownView)) {
-      this.hideStatusBar();
-      return;
-    }
-    this.applyToView(view);
-  }
 
   refreshActiveView(): void {
     const view = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -281,8 +282,9 @@ export default class RtlSupportPlugin extends Plugin implements RtlHost {
     const cmDom = cm?.dom as unknown as HTMLElement | undefined;
     const preview = view.contentEl.querySelector(".markdown-preview-view");
 
+    const fileName = view.file.path.split("/").pop() ?? "";
     const lines = [
-      `note: ${view.file.path}`,
+      `note: …/${fileName}`,
       `direction: ${resolved.direction} (${resolved.source})`,
       `default: ${this.settings.defaultDirection} | remember: ${this.settings.rememberPerFile}`,
       `frontmatter: ${JSON.stringify(
@@ -298,6 +300,7 @@ export default class RtlSupportPlugin extends Plugin implements RtlHost {
           .join(" ") || "(none)"
       }`,
       `preview style: ${preview instanceof HTMLElement ? preview.style.direction || "(unset)" : "(absent)"}`,
+      `settings: title=${this.settings.setNoteTitleDirection} pinFm=${this.settings.pinFrontmatterLtr} statusBar=${this.settings.statusBar}`,
     ];
 
     console.info("[RTL Support++]\n" + lines.join("\n"));

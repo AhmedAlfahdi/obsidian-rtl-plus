@@ -75,9 +75,16 @@ notes.
 
 ```bash
 npm install
-npm test          # direction, frontmatter and performance-contract tests
-npm run build     # lint, type-check, bundle main.js
+npm test          # direction, frontmatter, apply and performance-contract tests
+npm run smoke      # run the built plugin against a fake DOM and Obsidian API
+npm run build      # lint, type-check, bundle, then smoke-test the bundle
 ```
+
+`npm run smoke` is the important one: it loads the **built** `main.js` with a fake
+DOM, runs the real `onload` path, and asserts that `rtl` actually lands on the
+editor element, the view container, the reading view and the tab title. Unit
+tests cannot catch a direction that never reaches the DOM — that shipped as a bug
+once already.
 
 ## License
 
